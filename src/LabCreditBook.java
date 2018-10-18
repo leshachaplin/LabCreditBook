@@ -17,16 +17,20 @@ public class LabCreditBook {
         5. Edit
         6. Print students with avg. mark >= 9.0
          */
-        String name;
-        name = JOptionPane.showInputDialog("Input the name of student");
-
         LabCreditBook lab = new LabCreditBook();
         BufferedReader bufferedReader = null;
         try {
+            String name;
+            name = JOptionPane.showInputDialog("Input the name of student");
             bufferedReader = new BufferedReader(new FileReader("input.txt"));
             lab.mCreditBooks = CreditBook.Parser.parse(bufferedReader);
             CreditBook creditBook = lab.findCreditBookByStudentName(name);
-
+            for (CreditBook.Session se : creditBook.getSessions()) {
+                System.out.println(se.isPassedSession());
+            }
+            for (CreditBook.Session session : creditBook.getSessions()) {
+                System.out.format("%.1f%" ,session.averageMarkPerSession());
+            }
             System.out.println(creditBook.toString());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -34,6 +38,8 @@ public class LabCreditBook {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception en) {
+            System.out.println("Input variable name of student");
         } finally {
             if (bufferedReader != null) {
                 try {

@@ -85,6 +85,24 @@ public class CreditBook {
             clearExams();
         }
 
+        public boolean isPassedSession() {
+            boolean passed = false;
+            for (Session.Credit cr : mCredits) {
+                if (cr.mPassed == false) {
+                    passed = false;
+                } else {
+                    for (Session.Exam ex : mExams) {
+                        if (ex.mMark < 4) {
+                            passed = false;
+                        } else {
+                            passed = true;
+                        }
+                    }
+                }
+            }
+            return passed;
+        }
+
         public ArrayList<Exam> getExams() {
             return mExams;
         }
@@ -112,12 +130,13 @@ public class CreditBook {
             return sb.toString();
         }
 
-        public int averageMarkPerSession() {
-            int result = 0;
+        public double averageMarkPerSession() {
+            double result = 0.0;
             for(Session.Exam ex : getExams()) {
-                result += ex.mMark;
+                result += (double)ex.mMark;
             }
-            
+            result /= (double)mExams.size();
+
             return result;
         }
 
