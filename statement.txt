@@ -1,0 +1,50 @@
+[
+  {
+    "subject": "Matan",
+    "date": "27.05.2019",
+    "hours": 136,
+    "teacher": "Maestro Levakov",
+    "marks": [
+      {
+        "name": "Papino Ilya",
+        "mark": 5
+      },
+      {
+        "name": "Sinkevich Nikita",
+        "mark": 7
+      }
+    ]
+  },
+  {
+    "subject": "GA",
+    "date": "7.03.2019",
+    "hours": 68,
+    "teacher": "FIL",
+    "marks": [
+      {
+        "name": "Papino Ilya",
+        "mark": 4
+      },
+      {
+        "name": "Sinkevich Nikita",
+        "mark": 8
+      }
+    ]
+  },
+  {
+    "subject": "DMiML",
+    "date": "29.05.2019",
+    "hours": 1362,
+    "teacher": "VOLOCHKo",
+    "marks": [
+      {
+        "name": "Papino Ilya",
+        "mark": 6
+      },
+      {
+        "name": "Sinkevich Nikita",
+        "mark": 9
+      }
+    ]
+  }
+]

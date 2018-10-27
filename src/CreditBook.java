@@ -1,3 +1,6 @@
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,6 +41,16 @@ public class CreditBook {
         return mSessions;
     }
 
+    public double totalAverageMark() {
+        double result = 0.0;
+        for(CreditBook.Session se : getSessions()) {
+            result += se.averageMarkPerSession();
+        }
+        result /= getSessions().size();
+
+        return result;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(String.format(Locale.US, "Id: %d, Student: %s\n", mId, mStudent));
@@ -53,8 +66,20 @@ public class CreditBook {
 
     public static class Session {
 
+        private int numberOfSession;
         private final ArrayList<Session.Exam> mExams = new ArrayList<>();
         private final ArrayList<Session.Credit> mCredits = new ArrayList<>();
+
+        public Session() {
+        }
+
+        public Session(int numberOfSession) {
+            this.numberOfSession = numberOfSession;
+        }
+
+        public int getNumberOfSession() {
+            return numberOfSession;
+        }
 
         public void addExam(Session.Exam exam) {
             mExams.add(exam);
@@ -85,18 +110,21 @@ public class CreditBook {
             clearExams();
         }
 
-        public boolean isPassedSession() {
-            boolean passed = false;
-            for (Session.Credit cr : mCredits) {
-                if (cr.mPassed == false) {
+        public boolean isPassed() {
+            boolean passed = true;
+
+            for (CreditBook.Session.Credit cr : getCredits()) {
+                if (!cr.isPassed()) {
                     passed = false;
-                } else {
-                    for (Session.Exam ex : mExams) {
-                        if (ex.mMark < 4) {
-                            passed = false;
-                        } else {
-                            passed = true;
-                        }
+                    break;
+                }
+            }
+
+            if (passed) {
+                for (CreditBook.Session.Exam ex : getExams()) {
+                    if (ex.getMark() < 4) {
+                        passed = false;
+                        break;
                     }
                 }
             }
@@ -167,6 +195,46 @@ public class CreditBook {
         public static class Exam extends AcademicTest {
 
             private int mMark;
+
+            public static class Parser {
+
+                public static Map<String, ArrayList<Exam>> parse(String jsonString) throws IOException, ParseException {
+                    Map<String, ArrayList<Exam>> result = new HashMap<>();
+
+                    JSONArray jsonArray = new JSONArray(jsonString);
+                    for (int i = 0, size = jsonArray.length(); i < size; i++) {
+                        JSONObject json = (JSONObject) jsonArray.get(i);
+
+                        Date date = DateUtils.parseDate(json.getString("date"));
+                        int hours = json.getInt("hours");
+                        String teacher = json.getString("teacher");
+                        String subject = json.getString("subject");
+
+                        JSONArray marksJSON = json.getJSONArray("marks");
+                        for (int k = 0, length = marksJSON.length(); k < length; k++) {
+                            JSONObject jsonMark = (JSONObject) marksJSON.get(k);
+
+                            String name = jsonMark.getString("name");
+                            int mark = jsonMark.getInt("mark");
+
+                            Exam exam = new Exam(date, teacher, subject, hours, mark);
+
+                            ArrayList<Exam> exams = result.get(name);
+
+                            if (exams == null) {
+                               exams = new ArrayList<>();
+                               exams.add(exam);
+                               result.put(name, exams);
+                            } else {
+                                exams.add(exam);
+                            }
+                        }
+                    }
+
+                    return result;
+                }
+
+            }
 
             public Exam(Date date, String teacher, String subject, int hours, int mark) {
                 super(date, teacher, subject, hours);
@@ -241,13 +309,14 @@ public class CreditBook {
             Session session = new Session();
 
             String line = reader.readLine();
+            session.numberOfSession = Integer.parseInt(line);
+
+            line = reader.readLine();
+
             while (!SESSION_END.equals(line)) {
                 if (line == null) {
                     throw new IOException("Unexpected end of file");
                 }
-
-                // EXAM|01.01.2018|Petrov-Vodkin|Matan|68|9
-                // CREDIT|03.01.2018|Pupkin|GiA|106|true
 
                 String[] args = line.split(DELIMETER);
 
